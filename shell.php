@@ -87,7 +87,7 @@ if(isset($_GET['sql']))
 		$stmt = $dbh->query($_POST['query']);
 
 		echo '<table border="1"><tr>';
-		for ($i = 0; $i < $stmt->columnCount(); $i++) { echo '<td><b>'. $stmt->getColumnMeta($i)['name'] .'</b></td>'; }
+		for ($i = 0; $i < $stmt->columnCount(); $i++) { $col = $stmt->getColumnMeta($i); echo '<td><b>'. $col['name'] .'</b></td>'; }
 		echo '</tr>';
 
 		while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
