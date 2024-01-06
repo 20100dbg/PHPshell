@@ -37,7 +37,7 @@ function GetPerms($p)
 
 function GetSize($b)
 {
-	$u = ["b", "Kb", "Mb", "Gb"]; $i = 0;
+	$u = array("b", "Kb", "Mb", "Gb"); $i = 0;
 	while ($b > 1024) { $b = $b / 1024; $i++; }
     return round($b,2) . $u[$i];
 }
