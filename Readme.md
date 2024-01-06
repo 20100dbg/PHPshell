@@ -24,6 +24,7 @@ mini.php
 ### More content
 
 Another file is available : `mini-b64.txt`
+
 This is the base64 version of mini.php. It does not contain '+' and '/' chars to avoid URL encoding and other possible issues.
 
 ### Even more tricks
@@ -37,9 +38,12 @@ This is the base64 version of mini.php. It does not contain '+' and '/' chars to
 #### Upgrade to a more interactive shell
 
 PHP reverse shell : https://github.com/pentestmonkey/php-reverse-shell/blob/master/php-reverse-shell.php
+
 PHP bind shell : https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Bind%20Shell%20Cheatsheet.md
 
 ###### Good resources about shells
 https://www.revshells.com/
+
 https://yolospacehacker.com/hackersguide/en/?cat=Webshell
+
 https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md
