@@ -104,14 +104,13 @@ if(!empty($_POST['query']))
 }
 
 $dir = !empty($_GET['dir']) ? $_GET['dir'] : '.';
-$dir = GetPath($dir);
+
 if ($dir)
 {
 	$tab = scandir($dir);
-
 	if ($tab) 
 	{
-		echo "<br><br><b>Listing of " . $dir . '</b><br><br><div style="min-width: 600px">';
+		echo "<br><br><b>Listing of " . GetPath($dir) . '</b><br><br><div style="min-width: 600px">';
 		$i = 0;
 		foreach ($tab as $x)
 		{
