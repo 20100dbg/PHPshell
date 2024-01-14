@@ -41,7 +41,7 @@ PHP reverse shell : https://github.com/pentestmonkey/php-reverse-shell/blob/mast
 
 PHP bind shell : https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Bind%20Shell%20Cheatsheet.md
 
-###### Good resources about shells
+##### Good resources about shells
 https://www.revshells.com/
 
 https://yolospacehacker.com/hackersguide/en/?cat=Webshell
