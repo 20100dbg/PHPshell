@@ -1,7 +1,7 @@
 ## PHP Webshell
 
 This is a simple yet useful PHP webshell.
-It is compatible with PHP > 5.2
+It is compatible with PHP >= 5.4
 
 This webshell comes in two flavours :
 - shell.php : fully featured webshell to exploit
@@ -39,6 +39,8 @@ This is the base64 version of mini.php. It does not contain '+' and '/' chars to
 
 
 #### Upgrade to a more interactive shell
+
+Weevely : weaponized Web shell, lots of features : https://github.com/epinna/weevely3
 
 PHP reverse shell : https://github.com/pentestmonkey/php-reverse-shell/blob/master/php-reverse-shell.php
 
